@@ -59,14 +59,34 @@ class HatariHrdb < Formula
     EOS
     bin_wrapper.chmod 0755
 
-    # Build HRDB
+    cp Pathname(__dir__).join("Resources/hrdb.icns"), buildpath/"hrdb.icns"
+
     cd "tools/hrdb" do
+
+      # Replace the embedded application icon with our own, regenerate resources
+      system "sips", "-s", "format", "png", buildpath/"hrdb.icns", "--out", "images/hrdb_icon.png"
+      system "touch", "hrdb.qrc"
+
+      # Build
       system "qmake", "."
       system "make"
+
+      # Install
       apps_dir.install "hrdb.app"
+
+      # Set the application bundle icon
+      icon_dest = apps_dir/"hrdb.app/Contents/Resources/hrdb.icns"
+      (icon_dest.dirname).mkpath
+      cp buildpath/"hrdb.icns", icon_dest
+
+      # Patch Info.plist
+      plist_file = apps_dir/"hrdb.app/Contents/Info.plist"
+      system "/usr/libexec/PlistBuddy", "-c",
+             "Set :CFBundleIconFile hrdb.icns",
+             plist_file.to_s
     end
 
-    # CLI symlink for HRDB
+    # Add a CLI symlink for HRDB
     bin.install_symlink apps_dir/"hrdb.app/Contents/MacOS/hrdb"
 
     # Linking script
