@@ -15,6 +15,17 @@ class HatariHrdb < Formula
   depends_on "readline"
 
   def install
+    unless DevelopmentTools.clang_build_version
+odie <<~EOS
+  Xcode command-line tools are not fully initialized.
+
+  Please run the following before installing again:
+
+    sudo xcode-select --switch /Applications/Xcode.app
+    sudo xcodebuild -runFirstLaunch
+EOS
+    end
+
     (apps_dir = prefix/"Applications/hatari-hrdb").mkpath
 
     mkdir "build" do

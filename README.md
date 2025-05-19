@@ -9,6 +9,20 @@ The `hatari` binary has been renamed to `hatari-hrdb`, and the application bundl
 
 On the command line, `hatari-hrdb` runs a wrapper script located inside the bundle. This allows arguments to be passed correctly and avoids a known crash related to how SDL handles the invisible mouse cursor on macOS.
 
+## Prerequisites
+
+### 🔧 Full Xcode Setup (Required Once)
+
+The **Hatari** project builds a native macOS GUI using platform frameworks that depend on the full **Xcode.app**, not just the Command Line Tools.
+
+If you've installed or updated Xcode recently, or are building for the first time, make sure to initialize it:
+
+```bash
+sudo xcode-select --switch /Applications/Xcode.app
+sudo xcodebuild -runFirstLaunch
+```
+
+Without this step, the build may fail due to missing SDKs or uninitialized permissions.
 ## Installation
 
 ```bash
