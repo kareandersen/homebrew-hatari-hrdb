@@ -106,20 +106,42 @@ EOS
     (link_script = bin/"link-hatari-hrdb.sh").write <<~EOS
       #!/bin/bash
       set -e
+
       DEST_DIR="$HOME/Applications/hatari-hrdb"
-      [ "$1" == "--system" ] && DEST_DIR="/Applications/hatari-hrdb"
-      SOURCE_DIR="#{opt_prefix}/Applications/hatari-hrdb"
+      if [ "$1" == "--system" ]; then
+        DEST_DIR="/Applications/hatari-hrdb"
+      elif [ "$1" != "" ]; then
+        echo "Usage: $(basename "$0") [--system]"
+        echo "  (default: links to ~/Applications/hatari-hrdb)"
+        exit 1
+      fi
+
+      BREW_PREFIX="$(brew --prefix hatari-hrdb)"
+      SOURCE_DIR="$BREW_PREFIX/Applications/hatari-hrdb"
+
       mkdir -p "$DEST_DIR"
+
       for app in "$SOURCE_DIR"/*.app; do
         name=$(basename "$app")
         target="$DEST_DIR/$name"
-        if [ ! -e "$target" ]; then
+
+        if [ -L "$target" ]; then
+          current_target=$(readlink "$target")
+          if [ "$current_target" != "$app" ]; then
+            echo "Updating stale symlink: $target"
+            rm "$target"
+            ln -s "$app" "$target"
+          else
+            echo "Symlink already correct: $name"
+          fi
+        elif [ -e "$target" ]; then
+          echo "Skipping existing non-symlink: $name"
+        else
           echo "Linking $name to $DEST_DIR"
           ln -s "$app" "$target"
-        else
-          echo "$name already exists in $DEST_DIR"
         fi
       done
+
       echo "Done! Linked to: $DEST_DIR"
     EOS
     link_script.chmod 0755
