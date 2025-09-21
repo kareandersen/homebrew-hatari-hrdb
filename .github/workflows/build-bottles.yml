@@ -105,9 +105,11 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && \
                 "${{ github.event.inputs.version }}" == "head" ]]; then
-            TAG="bottles-head-$(date +%Y%m%d-%H%M%S)"
+            COMMIT_HASH=$(cd $(brew --cache)/downloads && find . -name "hatari-*" -type d | head -1 | xargs -I {} git -C {} rev-parse --short HEAD 2>/dev/null || echo "head")
+            TAG="bottles-head-${COMMIT_HASH}-$(date +%Y%m%d-%H%M%S)"
           else
-            TAG="bottles-v0.010-$(date +%Y%m%d-%H%M%S)"
+            VERSION=$(brew list --versions hatari-hrdb | cut -d' ' -f2)
+            TAG="bottles-${VERSION}-$(date +%Y%m%d-%H%M%S)"
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
@@ -124,11 +126,6 @@ jobs:
             brew tap kareandersen/homebrew-hatari-hrdb
             brew install hatari-hrdb
             ```
-
-            **Manual bottle installation:**
-            - Download the appropriate bottle for your architecture
-            - Extract and install with: \
-              `brew install ./hatari-hrdb--*.bottle.tar.gz`
           files: |
             bottles/bottles-arm64/*.bottle.tar.gz
             bottles/bottles-arm64/*.bottle.json
