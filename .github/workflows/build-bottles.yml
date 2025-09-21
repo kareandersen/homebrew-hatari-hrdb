@@ -86,3 +86,51 @@ jobs:
             *.bottle.tar.gz
             *.bottle.json
           retention-days: 30
+
+  create-release:
+    needs: build-bottles
+    if: needs.check-tests.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Download all bottle artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: bottles/
+
+      - name: Generate release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && \
+                "${{ github.event.inputs.version }}" == "head" ]]; then
+            TAG="bottles-head-$(date +%Y%m%d-%H%M%S)"
+          else
+            TAG="bottles-v0.010-$(date +%Y%m%d-%H%M%S)"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: "Bottles ${{ steps.tag.outputs.tag }}"
+          body: |
+            Pre-built bottles for hatari-hrdb
+
+            **Installation:**
+            ```bash
+            brew tap kareandersen/homebrew-hatari-hrdb
+            brew install hatari-hrdb
+            ```
+
+            **Manual bottle installation:**
+            - Download the appropriate bottle for your architecture
+            - Extract and install with: \
+              `brew install ./hatari-hrdb--*.bottle.tar.gz`
+          files: |
+            bottles/*/*.bottle.tar.gz
+            bottles/*/*.bottle.json
+          draft: false
+          prerelease: ${{ github.event.inputs.version == 'head' }}
