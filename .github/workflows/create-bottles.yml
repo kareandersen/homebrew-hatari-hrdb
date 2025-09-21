@@ -1,0 +1,97 @@
+---
+name: Create Bottles
+
+"on":
+  workflow_run:
+    workflows: ["Build Bottles"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  HOMEBREW_NO_AUTO_UPDATE: 1
+  HOMEBREW_NO_INSTALL_CLEANUP: 1
+
+jobs:
+  create-release:
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download bottle artifacts
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build-bottles.yml
+          name_is_regexp: true
+          name: bottles-.*
+          path: bottles/
+
+      - name: Generate release tag and extract bottle info
+        id: release_info
+        run: |
+          VERSION=$(find bottles/ -name "*.json" | head -1 | xargs jq -r '."kareandersen/hatari-hrdb/hatari-hrdb".formula.pkg_version')
+          TAG="bottles-${VERSION}-$(date +%Y%m%d-%H%M%S)"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          ARM64_SHA=$(find bottles/ -name "*arm64*.json" | head -1 | xargs jq -r '."kareandersen/hatari-hrdb/hatari-hrdb".bottle.tags | to_entries | .[0].value.sha256')
+          INTEL_SHA=$(find bottles/ -name "*sequoia.json" | grep -v arm64 | head -1 | xargs jq -r '."kareandersen/hatari-hrdb/hatari-hrdb".bottle.tags | to_entries | .[0].value.sha256')
+          echo "arm64_sha=$ARM64_SHA" >> "$GITHUB_OUTPUT"
+          echo "intel_sha=$INTEL_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_info.outputs.tag }}
+          name: "Bottles ${{ steps.release_info.outputs.tag }}"
+          body: |
+            Pre-built bottles for hatari-hrdb
+
+            **Installation:**
+            ```bash
+            brew tap kareandersen/homebrew-hatari-hrdb
+            brew install hatari-hrdb
+            ```
+          files: |
+            bottles/bottles-arm64/*.bottle.tar.gz
+            bottles/bottles-arm64/*.bottle.json
+            bottles/bottles-x86_64/*.bottle.tar.gz
+            bottles/bottles-x86_64/*.bottle.json
+          draft: false
+
+      - name: Update formula bottle block
+        run: |
+          sed -i \
+            -e 's|root_url "https://github.com/kareandersen/homebrew-hatari-hrdb/releases/download/[^"]*"|root_url "https://github.com/kareandersen/homebrew-hatari-hrdb/releases/download/${{ steps.release_info.outputs.tag }}"|' \
+            -e 's|sha256 cellar: :any, arm64_sequoia: "[^"]*"|sha256 cellar: :any, arm64_sequoia: "${{ steps.release_info.outputs.arm64_sha }}"|' \
+            -e 's|sha256 cellar: :any, sequoia:       "[^"]*"|sha256 cellar: :any, sequoia:       "${{ steps.release_info.outputs.intel_sha }}"|' \
+            Formula/hatari-hrdb.rb
+
+      - name: Verify formula was updated correctly
+        run: |
+          if ! grep -q "releases/download/${{ steps.release_info.outputs.tag }}" Formula/hatari-hrdb.rb; then
+            echo "ERROR: Formula root_url was not updated correctly"
+            exit 1
+          fi
+          if ! grep -q "${{ steps.release_info.outputs.arm64_sha }}" Formula/hatari-hrdb.rb; then
+            echo "ERROR: ARM64 SHA256 was not updated correctly"
+            exit 1
+          fi
+          if ! grep -q "${{ steps.release_info.outputs.intel_sha }}" Formula/hatari-hrdb.rb; then
+            echo "ERROR: Intel SHA256 was not updated correctly"
+            exit 1
+          fi
+          echo "Formula updated successfully"
+
+      - name: Commit updated formula
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/hatari-hrdb.rb
+          git commit -m "update bottle hashes for ${{ steps.release_info.outputs.tag }}"
+          git push
