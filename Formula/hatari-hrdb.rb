@@ -1,32 +1,31 @@
 class HatariHrdb < Formula
   desc "Hatari emulator with HRDB debugger"
   homepage "http://clarets.org/steve/projects/hrdb.html"
-  license "GPL-2.0"
   url "https://github.com/tattlemuss/hatari/archive/refs/tags/hrdb-v0.010.tar.gz"
   sha256 "ccbebf1367f7ffd1eb3b110b065d550362b66a840bfffba49555d7d84afd02bb"
-  version '0.010'
+  license "GPL-2.0-or-later"
   head "https://github.com/tattlemuss/hatari", branch: "hrdb-main", using: :git
 
+  depends_on "cmake" => :build
   depends_on "gcc" => :build
   depends_on "pkg-config" => :build
-  depends_on "cmake" => :build
-  depends_on "qt6"
   depends_on "libpng"
   depends_on "portaudio"
-  depends_on "sdl2"
   depends_on "portmidi"
+  depends_on "qt6"
   depends_on "readline"
+  depends_on "sdl2"
 
   def install
     unless DevelopmentTools.clang_build_version
-odie <<~EOS
-  Xcode command-line tools are not fully initialized.
+      odie <<~EOS
+        Xcode command-line tools are not fully initialized.
 
-  Please run the following before installing again:
+        Please run the following before installing again:
 
-    sudo xcode-select --switch /Applications/Xcode.app
-    sudo xcodebuild -runFirstLaunch
-EOS
+          sudo xcode-select --switch /Applications/Xcode.app
+          sudo xcodebuild -runFirstLaunch
+      EOS
     end
 
     (apps_dir = prefix/"Applications/hatari-hrdb").mkpath
@@ -76,10 +75,9 @@ EOS
     cp Pathname(__dir__).join("Resources/hrdb.icns"), buildpath/"hrdb.icns"
 
     cd "tools/hrdb" do
-
       # Replace the embedded application icon with our own, regenerate resources
       system "sips", "-s", "format", "png", buildpath/"hrdb.icns", "--out", "images/hrdb_icon.png"
-      system "touch", "hrdb.qrc"
+      touch "hrdb.qrc"
 
       # Build
       system "qmake", "."
@@ -90,7 +88,7 @@ EOS
 
       # Set the application bundle icon
       icon_dest = apps_dir/"hrdb.app/Contents/Resources/hrdb.icns"
-      (icon_dest.dirname).mkpath
+      icon_dest.dirname.mkpath
       cp buildpath/"hrdb.icns", icon_dest
 
       # Patch Info.plist
@@ -187,5 +185,11 @@ EOS
 
     EOS
   end
-end
 
+  test do
+    # Test that the hatari binary can be executed
+    assert_match "Hatari", shell_output("#{bin}/hatari-hrdb --version 2>&1", 1)
+    # Test that HRDB can be executed
+    assert_match "hrdb", shell_output("#{bin}/hrdb --version")
+  end
+end
