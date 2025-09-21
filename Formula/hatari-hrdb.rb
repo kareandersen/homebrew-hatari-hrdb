@@ -41,7 +41,12 @@ class HatariHrdb < Formula
     # Rename and install the app bundle
     mv "build/src/Hatari.app", "build/src/Hatari-HRDB.app"
 
-    # Ad-hoc sign the main binary for bottling compatibility
+    # Clean up bundled development files
+    rm_rf "build/src/Hatari-HRDB.app/Contents/Frameworks/lib/pkgconfig"
+    rm_rf "build/src/Hatari-HRDB.app/Contents/Frameworks/lib/cmake"
+    rm_f Dir["build/src/Hatari-HRDB.app/Contents/Frameworks/lib/*.a"]
+
+    # Sign the hatari binary
     system "codesign", "--force", "--sign", "-",
            "build/src/Hatari-HRDB.app/Contents/MacOS/Hatari"
 
