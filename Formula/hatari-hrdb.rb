@@ -6,6 +6,12 @@ class HatariHrdb < Formula
   license "GPL-2.0-or-later"
   head "https://github.com/tattlemuss/hatari", branch: "hrdb-main", using: :git
 
+  bottle do
+    root_url "https://github.com/kareandersen/homebrew-hatari-hrdb/releases/download/bottles-v0.010-20250921-194521"
+    sha256 cellar: :any, arm64_sequoia: "0b87bb113a488b8cf61e64ac5b7ec56339d36fcbd4e16b17376dcec83aa79da7"
+    sha256 cellar: :any, sequoia:       "7954f2ed16c620b5ee6b3b5c7d5627d8477145c41f3fa6062d9e7c316f48ffcc"
+  end
+
   depends_on "cmake" => :build
   depends_on "gcc" => :build
   depends_on "pkg-config" => :build
