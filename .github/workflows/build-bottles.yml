@@ -130,7 +130,9 @@ jobs:
             - Extract and install with: \
               `brew install ./hatari-hrdb--*.bottle.tar.gz`
           files: |
-            bottles/*/*.bottle.tar.gz
-            bottles/*/*.bottle.json
+            bottles/bottles-arm64/*.bottle.tar.gz
+            bottles/bottles-arm64/*.bottle.json
+            bottles/bottles-x86_64/*.bottle.tar.gz
+            bottles/bottles-x86_64/*.bottle.json
           draft: false
           prerelease: ${{ github.event.inputs.version == 'head' }}
