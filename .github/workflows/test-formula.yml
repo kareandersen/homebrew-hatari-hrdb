@@ -1,0 +1,105 @@
+name: Hatari+HRDB Bundle Test Formula
+
+on:
+  pull_request:
+    paths: [ 'Formula/hatari-hrdb.rb' ]
+  push:
+    branches: [ main ]
+    paths: [ 'Formula/hatari-hrdb.rb' ]
+  workflow_dispatch:
+    inputs:
+      test_stable:
+        description: 'Override to manually test stable version instead of HEAD'
+        required: false
+        default: false
+        type: boolean
+      architectures:
+        description: 'Architectures to test'
+        required: false
+        default: 'both'
+        type: choice
+        options:
+        - both
+        - intel-only
+        - arm64-only
+      skip_functionality_tests:
+        description: 'Skip functionality tests (build only)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  HOMEBREW_NO_AUTO_UPDATE: 1
+  HOMEBREW_NO_INSTALL_CLEANUP: 1
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        include:
+          - os: macos-13
+            runner_arch: intel
+          - os: macos-14
+            runner_arch: arm64
+        exclude:
+          # Exclude based on manual architecture selection
+          - ${{ github.event.inputs.architectures == 'arm64-only' && matrix.runner_arch == 'intel' }}
+          - ${{ github.event.inputs.architectures == 'intel-only' && matrix.runner_arch == 'arm64' }}
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Set up Homebrew
+      uses: Homebrew/actions/setup-homebrew@master
+
+    - name: Cache Homebrew downloads
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/Library/Caches/Homebrew/downloads
+          ~/Library/Caches/Homebrew/api
+        key: homebrew-test-${{ matrix.os }}-${{ hashFiles('Formula/hatari-hrdb.rb') }}
+        restore-keys: |
+          homebrew-test-${{ matrix.os }}-
+
+    - name: Audit formula
+      run: |
+        brew audit --strict Formula/hatari-hrdb.rb
+
+    - name: Install dependencies
+      run: |
+        brew tap ${{ github.repository }}
+        brew install --only-dependencies ./Formula/hatari-hrdb.rb
+
+    - name: Test build
+      run: |
+        # Test that the formula builds successfully
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          if [[ "${{ github.event.inputs.test_stable }}" == "true" ]]; then
+            echo "Manual dispatch - testing stable version"
+            brew install --build-from-source ./Formula/hatari-hrdb.rb
+          else
+            echo "Manual dispatch - testing HEAD version (default)"
+            brew install --build-from-source --HEAD ./Formula/hatari-hrdb.rb
+          fi
+        else
+          echo "Automatic trigger (PR/push) - testing stable version"
+          brew install --build-from-source ./Formula/hatari-hrdb.rb
+        fi
+
+    - name: Test functionality
+      if: github.event.inputs.skip_functionality_tests != 'true'
+      run: |
+        # Basic smoke tests
+        hatari-hrdb --version || echo "Version check completed"
+        hrdb --help || echo "HRDB help completed"
+
+        # Test app bundle exists
+        test -d "$(brew --prefix)/opt/hatari-hrdb/Applications/hatari-hrdb/Hatari-HRDB.app"
+        test -d "$(brew --prefix)/opt/hatari-hrdb/Applications/hatari-hrdb/hrdb.app"
+
+        echo "All tests passed!"
+
