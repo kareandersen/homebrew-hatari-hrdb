@@ -40,6 +40,11 @@ class HatariHrdb < Formula
 
     # Rename and install the app bundle
     mv "build/src/Hatari.app", "build/src/Hatari-HRDB.app"
+
+    # Ad-hoc sign the main binary for bottling compatibility
+    system "codesign", "--force", "--sign", "-",
+           "build/src/Hatari-HRDB.app/Contents/MacOS/Hatari"
+
     apps_dir.install "build/src/Hatari-HRDB.app"
 
     # Wrapper inside the .app bundle
@@ -85,6 +90,10 @@ class HatariHrdb < Formula
 
       # Install
       apps_dir.install "hrdb.app"
+
+      # Ad-hoc sign the HRDB binary for bottling compatibility
+      system "codesign", "--force", "--sign", "-",
+             apps_dir/"hrdb.app/Contents/MacOS/hrdb"
 
       # Set the application bundle icon
       icon_dest = apps_dir/"hrdb.app/Contents/Resources/hrdb.icns"
