@@ -101,18 +101,10 @@ jobs:
   create-release:
     needs: build-bottles
     if: needs.check-tests.outputs.should_build == 'true'
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-
-      - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
-      - name: Install formula for version detection
-        run: |
-          brew tap ${{ github.repository }}
-          brew install --build-bottle hatari-hrdb
 
       - name: Download all bottle artifacts
         uses: actions/download-artifact@v4
@@ -122,14 +114,8 @@ jobs:
       - name: Generate release tag
         id: tag
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && \
-                "${{ github.event.inputs.version }}" == "head" ]]; then
-            COMMIT_HASH=$(cd $(brew --cache)/downloads && find . -name "hatari-*" -type d | head -1 | xargs -I {} git -C {} rev-parse --short HEAD 2>/dev/null || echo "head")
-            TAG="bottles-head-${COMMIT_HASH}-$(date +%Y%m%d-%H%M%S)"
-          else
-            VERSION=$(brew list --versions hatari-hrdb | cut -d' ' -f2)
-            TAG="bottles-${VERSION}-$(date +%Y%m%d-%H%M%S)"
-          fi
+          VERSION=$(find bottles/ -name "*.json" | head -1 | xargs jq -r '."kareandersen/hatari-hrdb/hatari-hrdb".formula.pkg_version')
+          TAG="bottles-${VERSION}-$(date +%Y%m%d-%H%M%S)"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release

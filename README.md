@@ -9,9 +9,39 @@ The `hatari` binary has been renamed to `hatari-hrdb`, and the application bundl
 
 On the command line, `hatari-hrdb` runs a wrapper script located inside the bundle. This allows arguments to be passed correctly and avoids a known crash related to how SDL handles the invisible mouse cursor on macOS.
 
-## Prerequisites
+## Installation
 
-### 🔧 Full Xcode Setup (Required Once)
+```bash
+brew tap kareandersen/homebrew-hatari-hrdb
+```
+
+### 🍺 Pre-built Bottles (Recommended)
+
+Available for macOS Sequoia on both Intel and Apple Silicon:
+
+```bash
+brew install hatari-hrdb
+```
+
+### 🔨 Build from Source
+
+```bash
+brew install --build-from-source hatari-hrdb
+```
+
+### 🚧 Development Builds
+
+For the latest development version from the `hrdb-main` branch:
+
+```bash
+brew install --HEAD hatari-hrdb
+```
+
+Development builds include the latest features and fixes but may be less stable than tagged releases.
+
+## Build Prerequisites (Source Only)
+
+**Full Xcode Setup (Required Once)**
 
 The **Hatari** project builds a native macOS GUI using platform frameworks that depend on the full **Xcode.app**, not just the Command Line Tools.
 
@@ -23,25 +53,6 @@ sudo xcodebuild -runFirstLaunch
 ```
 
 Without this step, the build may fail due to missing SDKs or uninitialized permissions.
-
-## Installation
-
-```bash
-brew tap kareandersen/homebrew-hatari-hrdb
-brew install hatari-hrdb
-```
-
-> ⚠️ **Note**: This builds from source. You’ll need Xcode command-line tools and a Homebrew environment set up.
-
-### Development Builds
-
-For the latest development version from the `hrdb-main` branch:
-
-```bash
-brew install --HEAD hatari-hrdb
-```
-
-This builds directly from the HEAD of the repository and includes the latest features and fixes, but may be less stable than the tagged releases.
 
 ## Launching the Applications
 
