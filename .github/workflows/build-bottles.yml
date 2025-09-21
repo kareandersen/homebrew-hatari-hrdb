@@ -90,10 +90,18 @@ jobs:
   create-release:
     needs: build-bottles
     if: needs.check-tests.outputs.should_build == 'true'
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Install formula for version detection
+        run: |
+          brew tap ${{ github.repository }}
+          brew install --build-bottle hatari-hrdb
 
       - name: Download all bottle artifacts
         uses: actions/download-artifact@v4
