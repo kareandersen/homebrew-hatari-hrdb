@@ -61,14 +61,14 @@ jobs:
         restore-keys: |
           homebrew-test-${{ matrix.os }}-
 
-    - name: Audit formula
-      run: |
-        brew audit --strict Formula/hatari-hrdb.rb
-
-    - name: Install dependencies
+   - name: Install dependencies
       run: |
         brew tap ${{ github.repository }}
         brew install --only-dependencies ./Formula/hatari-hrdb.rb
+
+    - name: Audit formula
+      run: |
+        brew audit --strict hatari-hrdb
 
     - name: Test build
       run: |
