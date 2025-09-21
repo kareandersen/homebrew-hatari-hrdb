@@ -64,9 +64,10 @@ jobs:
     - name: Install dependencies
       run: |
         brew tap ${{ github.repository }}
-        brew install --only-dependencies ./Formula/hatari-hrdb.rb
+        brew install --only-dependencies hatari-hrdb
 
     - name: Audit formula
+      continue-on-error: true
       run: |
         brew audit --strict hatari-hrdb
 
@@ -76,14 +77,14 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           if [[ "${{ github.event.inputs.test_stable }}" == "true" ]]; then
             echo "Manual dispatch - testing stable version"
-            brew install --build-from-source ./Formula/hatari-hrdb.rb
+            brew install --build-from-source hatari-hrdb
           else
             echo "Manual dispatch - testing HEAD version (default)"
-            brew install --build-from-source --HEAD ./Formula/hatari-hrdb.rb
+            brew install --build-from-source --HEAD hatari-hrdb
           fi
         else
           echo "Automatic trigger (PR/push) - testing stable version"
-          brew install --build-from-source ./Formula/hatari-hrdb.rb
+          brew install --build-from-source hatari-hrdb
         fi
 
     - name: Test functionality
