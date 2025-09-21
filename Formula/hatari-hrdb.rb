@@ -2,8 +2,9 @@ class HatariHrdb < Formula
   desc "Hatari emulator with HRDB debugger"
   homepage "http://clarets.org/steve/projects/hrdb.html"
   license "GPL-2.0"
-  url "https://github.com/kareandersen/hatari-hrdb/archive/refs/tags/v0.009-x.tar.gz"
-  sha256 "ccc9a9cec33dbbd38944da1183c757cc74ffed3a2dff780c83c7e85c7df7a78c"
+  url "https://github.com/tattlemuss/hatari/archive/refs/tags/hrdb-v0.010.tar.gz"
+  sha256 "ccbebf1367f7ffd1eb3b110b065d550362b66a840bfffba49555d7d84afd02bb"
+  version '0.010'
   head "https://github.com/tattlemuss/hatari", branch: "hrdb-main", using: :git
 
   depends_on "gcc" => :build
