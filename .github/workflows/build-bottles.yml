@@ -50,7 +50,7 @@ jobs:
         include:
           - os: macos-latest
             arch: arm64
-          - os: macos-latest
+          - os: macos-15-intel
             arch: x86_64
 
     runs-on: ${{ matrix.os }}
