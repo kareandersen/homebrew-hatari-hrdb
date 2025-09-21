@@ -37,9 +37,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-13
+          - os: macos-latest
             runner_arch: intel
-          - os: macos-14
+          - os: macos-latest
             runner_arch: arm64
 
     runs-on: ${{ matrix.os }}
