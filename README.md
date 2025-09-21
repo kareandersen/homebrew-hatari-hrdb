@@ -23,14 +23,25 @@ sudo xcodebuild -runFirstLaunch
 ```
 
 Without this step, the build may fail due to missing SDKs or uninitialized permissions.
+
 ## Installation
 
 ```bash
 brew tap kareandersen/homebrew-hatari-hrdb
-brew install --HEAD hatari-hrdb
+brew install hatari-hrdb
 ```
 
 > ⚠️ **Note**: This builds from source. You’ll need Xcode command-line tools and a Homebrew environment set up.
+
+### Development Builds
+
+For the latest development version from the `hrdb-main` branch:
+
+```bash
+brew install --HEAD hatari-hrdb
+```
+
+This builds directly from the HEAD of the repository and includes the latest features and fixes, but may be less stable than the tagged releases.
 
 ## Launching the Applications
 
