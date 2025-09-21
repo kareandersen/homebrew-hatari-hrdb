@@ -7,7 +7,7 @@ class HatariHrdb < Formula
   head "https://github.com/tattlemuss/hatari", branch: "hrdb-main", using: :git
 
   bottle do
-    root_url "https://github.com/kareandersen/homebrew-hatari-hrdb/releases/download/bottles-0.010-20250921-232450"
+    root_url "https://github.com/kareandersen/homebrew-hatari-hrdb/releases/download/bottles-0.010-20250921-234532"
     sha256 cellar: :any, arm64_sequoia: "7bebb916a27b9f37057246d37efcacd31e706481c722d6da79d12b08332000dc"
     sha256 cellar: :any, sequoia:       ""
   end
