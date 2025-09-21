@@ -41,12 +41,15 @@ jobs:
             runner_arch: intel
           - os: macos-14
             runner_arch: arm64
-        exclude:
-          # Exclude based on manual architecture selection
-          - ${{ github.event.inputs.architectures == 'arm64-only' && matrix.runner_arch == 'intel' }}
-          - ${{ github.event.inputs.architectures == 'intel-only' && matrix.runner_arch == 'arm64' }}
 
     runs-on: ${{ matrix.os }}
+
+    # Skip job based on architecture selection
+    if: |
+      github.event.inputs.architectures == '' ||
+      github.event.inputs.architectures == 'both' ||
+      (github.event.inputs.architectures == 'intel-only' && matrix.runner_arch == 'intel') ||
+      (github.event.inputs.architectures == 'arm64-only' && matrix.runner_arch == 'arm64')
 
     steps:
     - name: Checkout repository
