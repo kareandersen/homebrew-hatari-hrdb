@@ -46,6 +46,15 @@ class HatariHrdb < Formula
     rm_rf "build/src/Hatari-HRDB.app/Contents/Frameworks/lib/cmake"
     rm_f Dir["build/src/Hatari-HRDB.app/Contents/Frameworks/lib/*.a"]
 
+    # Relink to use Homebrew SDL2 instead of bundled version
+    system "install_name_tool", "-change",
+           "@executable_path/../Frameworks/lib/libSDL2-2.0.0.dylib",
+           "#{Formula["sdl2"].opt_lib}/libSDL2-2.0.0.dylib",
+           "build/src/Hatari-HRDB.app/Contents/MacOS/Hatari"
+
+    # Remove bundled SDL2 to avoid signing issues
+    rm_f Dir["build/src/Hatari-HRDB.app/Contents/Frameworks/lib/libSDL2*"]
+
     # Sign the hatari executable
     system "codesign", "--force", "--sign", "-",
            "build/src/Hatari-HRDB.app/Contents/MacOS/Hatari"
