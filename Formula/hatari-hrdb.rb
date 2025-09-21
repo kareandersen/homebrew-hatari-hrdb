@@ -7,9 +7,9 @@ class HatariHrdb < Formula
   head "https://github.com/tattlemuss/hatari", branch: "hrdb-main", using: :git
 
   bottle do
-    root_url "https://github.com/kareandersen/homebrew-hatari-hrdb/releases/download/bottles-v0.010-20250921-194521"
-    sha256 cellar: :any, arm64_sequoia: "0b87bb113a488b8cf61e64ac5b7ec56339d36fcbd4e16b17376dcec83aa79da7"
-    sha256 cellar: :any, sequoia:       "7954f2ed16c620b5ee6b3b5c7d5627d8477145c41f3fa6062d9e7c316f48ffcc"
+    root_url "https://github.com/kareandersen/homebrew-hatari-hrdb/releases/download/bottles--20250921-205620"
+    sha256 cellar: :any, arm64_sequoia: "4ccffd4c9674d2f4e0894f5cd1d421caa9166252de4d8019296e7b6009fce445"
+    sha256 cellar: :any, sequoia:       "df878b184f7e0e5ce86f73f10fa2196ed15884f7aeb41e8535840447eb219d9c"
   end
 
   depends_on "cmake" => :build
