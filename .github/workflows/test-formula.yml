@@ -61,7 +61,7 @@ jobs:
         restore-keys: |
           homebrew-test-${{ matrix.os }}-
 
-   - name: Install dependencies
+    - name: Install dependencies
       run: |
         brew tap ${{ github.repository }}
         brew install --only-dependencies ./Formula/hatari-hrdb.rb
