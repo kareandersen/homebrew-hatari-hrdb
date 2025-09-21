@@ -46,17 +46,19 @@ class HatariHrdb < Formula
     rm_rf "build/src/Hatari-HRDB.app/Contents/Frameworks/lib/cmake"
     rm_f Dir["build/src/Hatari-HRDB.app/Contents/Frameworks/lib/*.a"]
 
-    # Sign the hatari binary
+    # Sign the hatari executable
     system "codesign", "--force", "--sign", "-",
            "build/src/Hatari-HRDB.app/Contents/MacOS/Hatari"
 
     apps_dir.install "build/src/Hatari-HRDB.app"
 
-    # Wrapper inside the .app bundle
-    in_bundle_wrapper = apps_dir/"Hatari-HRDB.app/Contents/MacOS/hatari-hrdb-wrapper.sh"
-    in_bundle_wrapper.write <<~EOS
+    # Create scripts directory and wrapper script outside the app bundle
+    scripts_dir = apps_dir/"scripts"
+    scripts_dir.mkpath
+    wrapper_script = scripts_dir/"hatari-hrdb-wrapper.sh"
+    wrapper_script.write <<~EOS
       #!/bin/bash
-      EXEC="$(dirname "$0")/Hatari"
+      EXEC="$(dirname "$0")/../Hatari-HRDB.app/Contents/MacOS/Hatari"
       ARGS=()
       for arg in "$@"; do
           case "$arg" in
@@ -67,13 +69,13 @@ class HatariHrdb < Formula
       done
       exec "$EXEC" "${ARGS[@]}"
     EOS
-    in_bundle_wrapper.chmod 0755
+    wrapper_script.chmod 0755
 
     # CLI wrapper in PATH
     bin_wrapper = bin/"hatari-hrdb"
     bin_wrapper.write <<~EOS
       #!/bin/bash
-      WRAPPED="#{opt_prefix}/Applications/hatari-hrdb/Hatari-HRDB.app/Contents/MacOS/hatari-hrdb-wrapper.sh"
+      WRAPPED="#{opt_prefix}/Applications/hatari-hrdb/scripts/hatari-hrdb-wrapper.sh"
       if [ ! -x "$WRAPPED" ]; then
         echo "Hatari-HRDB error: $WRAPPED not found or not executable."
         exit 1
