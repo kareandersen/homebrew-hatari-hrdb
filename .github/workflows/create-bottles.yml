@@ -39,8 +39,8 @@ jobs:
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-          ARM64_SHA=$(find bottles/ -name "*arm64*.json" | head -1 | xargs jq -r '."kareandersen/hatari-hrdb/hatari-hrdb".bottle.tags.arm64_sequoia.sha256')
-          INTEL_SHA=$(find bottles/ -name "*sequoia.json" | grep -v arm64 | head -1 | xargs jq -r '."kareandersen/hatari-hrdb/hatari-hrdb".bottle.tags.sequoia.sha256')
+          ARM64_SHA=$(jq -r '."kareandersen/hatari-hrdb/hatari-hrdb".bottle.tags.arm64_sequoia.sha256' bottles/bottles-arm64/*.json)
+          INTEL_SHA=$(jq -r '."kareandersen/hatari-hrdb/hatari-hrdb".bottle.tags.sequoia.sha256' bottles/bottles-x86_64/*.json)
           echo "arm64_sha=$ARM64_SHA" >> "$GITHUB_OUTPUT"
           echo "intel_sha=$INTEL_SHA" >> "$GITHUB_OUTPUT"
 
